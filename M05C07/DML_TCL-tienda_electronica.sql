@@ -294,4 +294,258 @@ COMMIT;
 
 -- ● 1 para el cliente 2, con 2 productos diferentes
 
+-- COMPROBACIONES: STOCK > 0 PARA INSERTAR UNA LINEA DE DETALLE DE UN PRODUCTO
+
+BEGIN;
+
+-- INSERTAR REGISTROS PARA LA SEGUNDA FACTURA
+
+INSERT INTO factura VALUES ( 2, 2, '06-06-2022', 0, 0, 0 );
+
+-- PUNTO DE GUARDADO PARA FACTURA
+
+SAVEPOINT factura_creada;
+
+-- INSERTAR REGISTROS DENTRO DEL DETALLE DE LA FACTURA
+
+-- PRIMERA LINEA DE DETALLE
+
+INSERT INTO
+    detalle_factura
+VALUES
+    (
+        4,
+        2,
+        (
+            SELECT
+                id_producto
+            FROM
+                producto
+            WHERE
+                id_producto = 3
+        ),
+        (
+            SELECT
+                (valor_unitario / 1.19)
+            FROM
+                producto
+            WHERE
+                id_producto = 3
+        ),
+        (
+            SELECT
+                ((valor_unitario / 1.19) * 0.19)
+            FROM
+                producto
+            WHERE
+                id_producto = 3
+        ),
+        (
+            SELECT
+                valor_unitario
+            FROM
+                producto
+            WHERE
+                id_producto = 3
+        )
+    );
+
+-- ACTUALIZAR STOCK DEL PRODUCTO
+
+UPDATE producto SET stock = stock - 1 WHERE id_producto = 3;
+
+-- SEGUNDA LINEA DE DETALLE
+
+INSERT INTO
+    detalle_factura
+VALUES
+    (
+        5,
+        2,
+        (
+            SELECT
+                id_producto
+            FROM
+                producto
+            WHERE
+                id_producto = 5
+        ),
+        (
+            SELECT
+                (valor_unitario / 1.19)
+            FROM
+                producto
+            WHERE
+                id_producto = 5
+        ),
+        (
+            SELECT
+                ((valor_unitario / 1.19) * 0.19)
+            FROM
+                producto
+            WHERE
+                id_producto = 5
+        ),
+        (
+            SELECT
+                valor_unitario
+            FROM
+                producto
+            WHERE
+                id_producto = 5
+        )
+    );
+
+-- ACTUALIZAR STOCK DEL PRODUCTO
+
+UPDATE producto SET stock = stock - 1 WHERE id_producto = 5;
+
+-- ACTUALIZAR FACTURA EL RESULTADO DE LA SUMA DE LAS LINEAS DE DETALLE
+
+UPDATE
+    factura
+SET
+    subtotal_factura = (
+        SELECT
+            SUM (subtotal_producto)
+        FROM
+            detalle_factura
+        WHERE
+            nro_factura = 2
+    ),
+    iva_factura = (
+        SELECT
+            SUM (iva_producto)
+        FROM
+            detalle_factura
+        WHERE
+            nro_factura = 2
+    ),
+    total_factura = (
+        SELECT
+            SUM (cantidad_producto)
+        FROM
+            detalle_factura
+        WHERE
+            nro_factura = 2
+    )
+WHERE
+    nro_factura = 2;
+
+-- ROLLBACK PARA VOLVER AL SAVEPOINT (FACTURA CREADA)
+
+ROLLBACK TO SAVEPOINT factura_creada;
+
+-- ROLLBACK DE TODA LA OPERACIÓN
+
+ROLLBACK;
+
+-- TERMINAR LA OPERACIÓN Y GUARDAR LOS CAMBIOS
+
+COMMIT;
+
 -- ● 1 para el cliente 3, con 1 solo producto
+
+-- COMPROBACIONES: STOCK > 0 PARA INSERTAR UNA LINEA DE DETALLE DE UN PRODUCTO
+
+BEGIN;
+
+-- INSERTAR REGISTROS PARA LA SEGUNDA FACTURA
+
+INSERT INTO factura VALUES ( 3, 3, '08-06-2022', 0, 0, 0 );
+
+-- PUNTO DE GUARDADO PARA FACTURA
+
+SAVEPOINT factura_creada;
+
+-- INSERTAR REGISTROS DENTRO DEL DETALLE DE LA FACTURA
+
+-- PRIMERA LINEA DE DETALLE
+
+INSERT INTO
+    detalle_factura
+VALUES
+    (
+        6,
+        3,
+        (
+            SELECT
+                id_producto
+            FROM
+                producto
+            WHERE
+                id_producto = 1
+        ),
+        (
+            SELECT
+                (valor_unitario / 1.19)
+            FROM
+                producto
+            WHERE
+                id_producto = 1
+        ),
+        (
+            SELECT
+                ((valor_unitario / 1.19) * 0.19)
+            FROM
+                producto
+            WHERE
+                id_producto = 1
+        ),
+        (
+            SELECT
+                valor_unitario
+            FROM
+                producto
+            WHERE
+                id_producto = 1
+        )
+    );
+
+-- ACTUALIZAR STOCK DEL PRODUCTO
+
+UPDATE producto SET stock = stock - 1 WHERE id_producto = 1;
+
+-- ACTUALIZAR FACTURA EL RESULTADO DE LA SUMA DE LAS LINEAS DE DETALLE
+
+UPDATE
+    factura
+SET
+    subtotal_factura = (
+        SELECT
+            SUM (subtotal_producto)
+        FROM
+            detalle_factura
+        WHERE
+            nro_factura = 3
+    ),
+    iva_factura = (
+        SELECT
+            SUM (iva_producto)
+        FROM
+            detalle_factura
+        WHERE
+            nro_factura = 3
+    ),
+    total_factura = (
+        SELECT
+            SUM (cantidad_producto)
+        FROM
+            detalle_factura
+        WHERE
+            nro_factura = 3
+    )
+WHERE
+    nro_factura = 3;
+
+-- ROLLBACK PARA VOLVER AL SAVEPOINT (FACTURA CREADA)
+
+ROLLBACK TO SAVEPOINT factura_creada;
+
+-- ROLLBACK DE TODA LA OPERACIÓN
+
+ROLLBACK;
+
+-- TERMINAR LA OPERACIÓN Y GUARDAR LOS CAMBIOS
+
+COMMIT;
